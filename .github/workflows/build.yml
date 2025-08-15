@@ -27,7 +27,11 @@ jobs:
             libfreetype6-dev || true
 
       - name: Build engine + QVMs
-        run: make BUILD_GAME_QVM=1
+        run: |
+          # Use sdl2-config to find SDL2 include/library paths
+          export CFLAGS="$(sdl2-config --cflags)"
+          export LDFLAGS="$(sdl2-config --libs)"
+          make BUILD_GAME_QVM=1
 
       - name: Strip binaries
         run: strip build/release*/ioq3*

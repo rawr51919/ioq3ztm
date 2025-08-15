@@ -121,7 +121,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install macOS dependencies (SDL 1.2)
+      - name: Install macOS dependencies (SDL 1.2 via sdl12-compat)
         run: |
           brew install sdl12-compat openal-soft || true
 
@@ -141,15 +141,27 @@ jobs:
         run: chmod +x ./make-macosx.sh && chmod +x ./make-macosx-ub.sh
 
       - name: Build i386 macOS binary
+        env:
+          CFLAGS: "-I/usr/local/include/SDL"
+          LDFLAGS: "-L/usr/local/lib -lSDLmain -lSDL -framework OpenAL"
         run: ./make-macosx.sh i386
 
       - name: Build x86_64 macOS binary
+        env:
+          CFLAGS: "-I/usr/local/include/SDL"
+          LDFLAGS: "-L/usr/local/lib -lSDLmain -lSDL -framework OpenAL"
         run: ./make-macosx.sh x86_64
 
       - name: Build PPC macOS binary
+        env:
+          CFLAGS: "-I/usr/local/include/SDL"
+          LDFLAGS: "-L/usr/local/lib -lSDLmain -lSDL -framework OpenAL"
         run: ./make-macosx.sh ppc
 
       - name: Build Universal Binary
+        env:
+          CFLAGS: "-I/usr/local/include/SDL"
+          LDFLAGS: "-L/usr/local/lib -lSDLmain -lSDL -framework OpenAL"
         run: ./make-macosx-ub.sh
 
       - name: Strip binaries
@@ -183,6 +195,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-i686 \
             g++-mingw-w64-i686 \
+            sdl-mingw-w64-i686 \
             binutils-mingw-w64 || true
 
       - name: Download baseq3 QVMs
@@ -205,8 +218,8 @@ jobs:
             CXX=i686-w64-mingw32-g++ \
             STRIP=i686-w64-mingw32-strip \
             WINDRES=i686-w64-mingw32-windres \
-            CFLAGS="-mwindows" \
-            LDFLAGS="-mwindows -lSDLmain -lSDL -lcurl" \
+            CFLAGS="-I/usr/i686-w64-mingw32/include/SDL -mwindows" \
+            LDFLAGS="-L/usr/i686-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows" \
             PLATFORM=mingw32 \
             ARCH=i686
 
@@ -242,6 +255,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
+            sdl-mingw-w64-x86-64 \
             binutils-mingw-w64 || true
 
       - name: Download baseq3 QVMs
@@ -264,8 +278,8 @@ jobs:
             CXX=x86_64-w64-mingw32-g++ \
             STRIP=x86_64-w64-mingw32-strip \
             WINDRES=x86_64-w64-mingw32-windres \
-            CFLAGS="-mwindows" \
-            LDFLAGS="-mwindows -lSDLmain -lSDL -lcurl" \
+            CFLAGS="-I/usr/x86_64-w64-mingw32/include/SDL -mwindows" \
+            LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows" \
             PLATFORM=mingw32 \
             ARCH=x86_64
 

@@ -137,8 +137,8 @@ jobs:
           name: missionpack-qvms
           path: missionpack
 
-      - name: Make macOS compile script executable
-        run: chmod +x ./make-macosx.sh
+      - name: Make macOS compile scripts executable
+        run: chmod +x ./make-macosx.sh && chmod +x ./make-macosx-ub.sh
 
       - name: Build i386 macOS binary
         run: ./make-macosx.sh i386

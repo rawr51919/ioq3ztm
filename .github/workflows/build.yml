@@ -137,19 +137,24 @@ jobs:
           name: missionpack-qvms
           path: missionpack
 
-      - name: Build engine
-        run: |
-          export PATH="/opt/homebrew/opt/sdl12-compat/bin:$PATH"
-          export CFLAGS="$(sdl-config --cflags) -Wno-error"
-          export LDFLAGS="$(sdl-config --libs)"
-          make
+      - name: Make macOS compile script executable
+        run: chmod +x ./make-macosx.sh
+
+      - name: Build i386 macOS binary
+        run: ./make-macosx.sh i386
+
+      - name: Build x86_64 macOS binary
+        run: ./make-macosx.sh x86_64
+
+      - name: Build PPC macOS binary
+        run: ./make-macosx.sh ppc
+
+      - name: Build Universal Binary
+        run: ./make-macosx-ub.sh
 
       - name: Strip binaries
         run: |
           find build/release* -type f -name 'ioq3*' -exec strip {} \; || true
-
-      - name: Build Universal Binary
-        run: ./make-macosx-ub.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -178,9 +183,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-i686 \
             g++-mingw-w64-i686 \
-            binutils-mingw-w64 \
-            mingw-w64-i686-sdl1.2-dev \
-            mingw-w64-i686-curl
+            binutils-mingw-w64 || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -196,7 +199,8 @@ jobs:
 
       - name: Cross-compile engine x86
         run: |
-          make \
+          chmod +x ./cross-make-mingw.sh \
+          ./cross-make-mingw.sh \
             CC=i686-w64-mingw32-gcc \
             CXX=i686-w64-mingw32-g++ \
             STRIP=i686-w64-mingw32-strip \
@@ -238,9 +242,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-x86-64 \
             g++-mingw-w64-x86-64 \
-            binutils-mingw-w64 \
-            mingw-w64-x86-64-sdl1.2-dev \
-            mingw-w64-x86-64-curl
+            binutils-mingw-w64 || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -256,7 +258,8 @@ jobs:
 
       - name: Cross-compile engine x64
         run: |
-          make \
+          chmod +x ./cross-make-mingw64.sh \
+          ./cross-make-mingw64.sh \
             CC=x86_64-w64-mingw32-gcc \
             CXX=x86_64-w64-mingw32-g++ \
             STRIP=x86_64-w64-mingw32-strip \

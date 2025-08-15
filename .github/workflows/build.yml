@@ -180,7 +180,7 @@ jobs:
             g++-mingw-w64-i686 \
             binutils-mingw-w64 \
             mingw-w64-i686-sdl1.2-dev \
-            mingw-w64-i686-curl || true
+            mingw-w64-i686-curl
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -240,7 +240,7 @@ jobs:
             g++-mingw-w64-x86-64 \
             binutils-mingw-w64 \
             mingw-w64-x86-64-sdl1.2-dev \
-            mingw-w64-x86-64-curl || true
+            mingw-w64-x86-64-curl
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4

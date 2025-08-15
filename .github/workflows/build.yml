@@ -174,8 +174,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install MinGW-w64
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mingw-w64 || true
+      - name: Install MinGW-w64 (32-bit + 64-bit)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-mingw-w64-i686 \
+            g++-mingw-w64-i686 \
+            gcc-mingw-w64-x86-64 \
+            g++-mingw-w64-x86-64 || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -193,6 +199,7 @@ jobs:
         run: |
           make \
             CC=${{ matrix.arch }}-w64-mingw32-gcc \
+            CXX=${{ matrix.arch }}-w64-mingw32-g++ \
             STRIP=${{ matrix.arch }}-w64-mingw32-strip \
             PLATFORM=mingw32 \
             ARCH=${{ matrix.arch }}
@@ -200,7 +207,9 @@ jobs:
       - name: Strip cross-compiled binaries
         run: |
           for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
-            [ -f "$f" ] && ${ { matrix.arch } }-w64-mingw32-strip "$f"
+            if [ -f "$f" ]; then
+              ${{ matrix.arch }}-w64-mingw32-strip "$f"
+            fi
           done || true
 
       - name: Upload artifact

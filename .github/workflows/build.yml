@@ -33,7 +33,8 @@ jobs:
           make BUILD_GAME_QVM=1
 
       - name: Strip binaries
-        run: strip build/release*/ioq3*
+        run: |
+          find build/release* -type f -name 'ioq3*' -exec strip {} \; || true
 
       - name: Upload QVMs
         uses: actions/upload-artifact@v4
@@ -83,7 +84,10 @@ jobs:
 
       - name: Strip binaries
         shell: msys2 {0}
-        run: strip build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll
+        run: |
+          for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
+            [ -f "$f" ] && strip "$f"
+          done || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -120,7 +124,8 @@ jobs:
           make
 
       - name: Strip binaries
-        run: strip build/release*/ioq3*
+        run: |
+          find build/release* -type f -name 'ioq3*' -exec strip {} \; || true
 
       - name: Build Universal Binary
         run: ./make-macosx-ub.sh
@@ -168,7 +173,9 @@ jobs:
 
       - name: Strip cross-compiled binaries
         run: |
-          ${ { matrix.arch } }-w64-mingw32-strip build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll
+          for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
+            [ -f "$f" ] && ${ { matrix.arch } }-w64-mingw32-strip "$f"
+          done || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

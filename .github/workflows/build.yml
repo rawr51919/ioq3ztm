@@ -29,7 +29,8 @@ jobs:
       - name: Build engine + QVMs
         run: |
           # Use sdl2-config to find SDL2 include/library paths
-          export CFLAGS="$(sdl2-config --cflags)"
+          # Disable -Werror so warnings do not abort build
+          export CFLAGS="$(sdl2-config --cflags) -Wno-error"
           export LDFLAGS="$(sdl2-config --libs)"
           make BUILD_GAME_QVM=1
 

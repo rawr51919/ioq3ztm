@@ -212,16 +212,14 @@ jobs:
 
       - name: Cross-compile engine x86
         run: |
-          chmod +x ./cross-make-mingw.sh && \
-          ./cross-make-mingw.sh \
-            CC=i686-w64-mingw32-gcc \
-            CXX=i686-w64-mingw32-g++ \
-            STRIP=i686-w64-mingw32-strip \
-            WINDRES=i686-w64-mingw32-windres \
-            CFLAGS="-I/usr/i686-w64-mingw32/include/SDL -mwindows" \
-            LDFLAGS="-L/usr/i686-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows" \
-            PLATFORM=mingw32 \
-            ARCH=i686
+          chmod +x ./cross-make-mingw.sh
+          export CC=i686-w64-mingw32-gcc
+          export CXX=i686-w64-mingw32-g++
+          export STRIP=i686-w64-mingw32-strip
+          export WINDRES=i686-w64-mingw32-windres
+          export CFLAGS="-I/usr/i686-w64-mingw32/include/SDL -mwindows"
+          export LDFLAGS="-L/usr/i686-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows"
+          ./cross-make-mingw.sh PLATFORM=mingw32 ARCH=i686 CC=i686-w64-mingw32-gcc WINDRES=i686-w64-mingw32-windres
 
       - name: Strip binaries
         run: |
@@ -272,16 +270,14 @@ jobs:
 
       - name: Cross-compile engine x64
         run: |
-          chmod +x ./cross-make-mingw64.sh && \
-          ./cross-make-mingw64.sh \
-            CC=x86_64-w64-mingw32-gcc \
-            CXX=x86_64-w64-mingw32-g++ \
-            STRIP=x86_64-w64-mingw32-strip \
-            WINDRES=x86_64-w64-mingw32-windres \
-            CFLAGS="-I/usr/x86_64-w64-mingw32/include/SDL -mwindows" \
-            LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows" \
-            PLATFORM=mingw32 \
-            ARCH=x86_64
+          chmod +x ./cross-make-mingw64.sh
+          export CC=x86_64-w64-mingw32-gcc
+          export CXX=x86_64-w64-mingw32-g++
+          export STRIP=x86_64-w64-mingw32-strip
+          export WINDRES=x86_64-w64-mingw32-windres
+          export CFLAGS="-I/usr/x86_64-w64-mingw32/include/SDL -mwindows"
+          export LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lSDLmain -lSDL -lcurl -mwindows"
+          ./cross-make-mingw64.sh PLATFORM=mingw32 ARCH=x86_64 CC=x86_64-w64-mingw32-gcc WINDRES=x86_64-w64-mingw32-windres
 
       - name: Strip binaries
         run: |

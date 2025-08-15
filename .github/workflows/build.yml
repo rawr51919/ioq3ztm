@@ -183,7 +183,8 @@ jobs:
             gcc-mingw-w64-i686 \
             g++-mingw-w64-i686 \
             gcc-mingw-w64-x86-64 \
-            g++-mingw-w64-x86-64 || true
+            g++-mingw-w64-x86-64 \
+            binutils-mingw-w64 || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -203,6 +204,7 @@ jobs:
             CC=${{ matrix.arch }}-w64-mingw32-gcc \
             CXX=${{ matrix.arch }}-w64-mingw32-g++ \
             STRIP=${{ matrix.arch }}-w64-mingw32-strip \
+            WINDRES=${{ matrix.arch }}-w64-mingw32-windres \
             PLATFORM=mingw32 \
             ARCH=${{ matrix.arch }}
 

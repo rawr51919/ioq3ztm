@@ -36,11 +36,17 @@ jobs:
         run: |
           find build/release* -type f -name 'ioq3*' -exec strip {} \; || true
 
-      - name: Upload QVMs
+      - name: Upload baseq3 QVMs
         uses: actions/upload-artifact@v4
         with:
           name: baseq3-qvms
-          path: baseq3/*.qvm
+          path: baseq3/vm/*.qvm
+          
+      - name: Upload missionpack QVMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: missionpack-qvms
+          path: missionpack/vm/*.qvm
 
       - name: Upload Linux binaries
         uses: actions/upload-artifact@v4
@@ -72,11 +78,17 @@ jobs:
             make
           msystem: MINGW64
 
-      - name: Download QVMs
+      - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
         with:
           name: baseq3-qvms
           path: baseq3
+      
+      - name: Download missionpack QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: missionpack-qvms
+          path: missionpack
 
       - name: Build engine
         shell: msys2 {0}
@@ -98,7 +110,8 @@ jobs:
             build/release*/renderer_opengl*.dll
             build/release*/cgame*.dll
             build/release*/qagame*.dll
-            baseq3/*.qvm
+            baseq3/vm/*.qvm
+            missionpack/vm/*.qvm
 
   native-build-macos:
     name: Native Build macOS
@@ -111,11 +124,17 @@ jobs:
       - name: Install macOS dependencies (SDL 1.2)
         run: brew install sdl@1 openal-soft libpng freetype
 
-      - name: Download QVMs
+      - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
         with:
           name: baseq3-qvms
           path: baseq3
+      
+      - name: Download missionpack QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: missionpack-qvms
+          path: missionpack
 
       - name: Build engine
         run: |
@@ -139,7 +158,8 @@ jobs:
             build/release*/renderer_opengl*
             build/release*/cgame*
             build/release*/qagame*
-            baseq3/*.qvm
+            baseq3/vm/*.qvm
+            missionpack/vm/*.qvm
             build/universal/*
 
   cross-build-windows:
@@ -157,11 +177,17 @@ jobs:
       - name: Install MinGW-w64
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mingw-w64 || true
 
-      - name: Download QVMs
+      - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
         with:
           name: baseq3-qvms
           path: baseq3
+      
+      - name: Download missionpack QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: missionpack-qvms
+          path: missionpack
 
       - name: Cross-compile engine
         run: |
@@ -186,4 +212,5 @@ jobs:
             build/release*/renderer_opengl*.dll
             build/release*/cgame*.dll
             build/release*/qagame*.dll
-            baseq3/*.qvm
+            baseq3/vm/*.qvm
+            missionpack/vm/*.qvm

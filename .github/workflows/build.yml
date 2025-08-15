@@ -92,7 +92,7 @@ jobs:
 
       - name: Build engine
         shell: msys2 {0}
-        run: make
+        run: make PLATFORM=mingw32
 
       - name: Strip binaries
         shell: msys2 {0}
@@ -123,8 +123,7 @@ jobs:
 
       - name: Install macOS dependencies (SDL 1.2)
         run: |
-          brew tap cartr/qt4
-          brew install cartr/qt4/sdl12-compat openal-soft libpng freetype
+          brew install sdl12-compat openal-soft libpng freetype || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -140,6 +139,7 @@ jobs:
 
       - name: Build engine
         run: |
+          export PATH="/opt/homebrew/opt/sdl12-compat/bin:$PATH"
           export CFLAGS="$(sdl-config --cflags) -Wno-error"
           export LDFLAGS="$(sdl-config --libs)"
           make
@@ -209,7 +209,7 @@ jobs:
       - name: Strip cross-compiled binaries
         run: |
           for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
-            [ -f "$f" ] && ${ { matrix.arch } }-w64-mingw32-strip "$f"
+            [ -f "$f" ] && ${{ matrix.arch }}-w64-mingw32-strip "$f"
           done || true
 
       - name: Upload artifact

@@ -40,13 +40,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: baseq3-qvms
-          path: baseq3/vm/*.qvm
+          path: build/release*/baseq3/vm/*.qvm
           
       - name: Upload missionpack QVMs
         uses: actions/upload-artifact@v4
         with:
           name: missionpack-qvms
-          path: missionpack/vm/*.qvm
+          path: build/release*/missionpack/vm/*.qvm
 
       - name: Upload Linux binaries
         uses: actions/upload-artifact@v4
@@ -110,8 +110,8 @@ jobs:
             build/release*/renderer_opengl*.dll
             build/release*/cgame*.dll
             build/release*/qagame*.dll
-            baseq3/vm/*.qvm
-            missionpack/vm/*.qvm
+            build/release*/baseq3/vm/*.qvm
+            build/release*/missionpack/vm/*.qvm
 
   native-build-macos:
     name: Native Build macOS
@@ -158,8 +158,8 @@ jobs:
             build/release*/renderer_opengl*
             build/release*/cgame*
             build/release*/qagame*
-            baseq3/vm/*.qvm
-            missionpack/vm/*.qvm
+            build/release*/baseq3/vm/*.qvm
+            build/release*/missionpack/vm/*.qvm
             build/universal/*
 
   cross-build-windows:
@@ -212,5 +212,5 @@ jobs:
             build/release*/renderer_opengl*.dll
             build/release*/cgame*.dll
             build/release*/qagame*.dll
-            baseq3/vm/*.qvm
-            missionpack/vm/*.qvm
+            build/release*/baseq3/vm/*.qvm
+            build/release*/missionpack/vm/*.qvm

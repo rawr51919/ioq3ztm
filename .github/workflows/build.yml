@@ -16,17 +16,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Linux dependencies
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y \
-          build-essential libsdl2-dev libopenal-dev libogg-dev libvorbis-dev \
-          libpng-dev libfreetype6-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libsdl2-dev \
+            libopenal-dev \
+            libogg-dev \
+            libvorbis-dev \
+            libpng-dev \
+            libfreetype6-dev
 
+      # Windows dependencies
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         with:
-          update: true
+          update: false
           install: >-
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-SDL2
@@ -35,23 +44,66 @@ jobs:
             make
           msystem: MINGW64
 
+      # macOS dependencies
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install sdl2 openal-soft libpng freetype
 
+      # Linux: Build engine + QVMs
       - name: Build engine + QVMs (Linux)
         if: runner.os == 'Linux'
         run: make BUILD_GAME_QVM=1
 
-      - name: Build engine + QVMs (Windows)
+      # Strip Linux binaries
+      - name: Strip binaries (Linux)
+        if: runner.os == 'Linux'
+        run: strip build/release*/ioq3*
+
+      # Upload QVMs from Linux
+      - name: Upload QVMs
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseq3-qvms
+          path: baseq3/*.qvm
+
+      # Windows: Download QVMs, build engine only
+      - name: Download QVMs (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/download-artifact@v4
+        with:
+          name: baseq3-qvms
+          path: baseq3
+
+      - name: Build engine (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
-        run: make BUILD_GAME_QVM=1
+        run: make
 
-      - name: Build engine + QVMs (macOS)
+      # Strip Windows binaries
+      - name: Strip binaries (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: strip build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll
+
+      # macOS: Download QVMs, build engine only
+      - name: Download QVMs (macOS)
         if: runner.os == 'macOS'
-        run: make BUILD_GAME_QVM=1
+        uses: actions/download-artifact@v4
+        with:
+          name: baseq3-qvms
+          path: baseq3
 
+      - name: Build engine (macOS)
+        if: runner.os == 'macOS'
+        run: make
+
+      # Strip macOS binaries
+      - name: Strip binaries (macOS)
+        if: runner.os == 'macOS'
+        run: strip build/release*/ioq3*
+
+      # Upload native artifacts
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -66,23 +118,42 @@ jobs:
   cross-build-windows:
     name: Cross-compile Windows from Linux
     runs-on: ubuntu-latest
+    needs: native-build
     strategy:
       matrix:
         arch: [i686, x86_64]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install MinGW-w64
-        run: sudo apt-get update && sudo apt-get install -y mingw-w64
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64
 
-      - name: Build cross-compiled engine + QVMs
+      # Download Linux-built QVMs
+      - name: Download QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: baseq3-qvms
+          path: baseq3
+
+      # Cross-compile engine (reuse QVMs)
+      - name: Build cross-compiled engine
         run: |
           make \
             CC=${{ matrix.arch }}-w64-mingw32-gcc \
             STRIP=${{ matrix.arch }}-w64-mingw32-strip \
-            BUILD_GAME_QVM=1
+            PLATFORM=mingw32 \
+            ARCH=${{ matrix.arch }}
 
+      # Strip cross-compiled Windows binaries
+      - name: Strip cross-compiled binaries
+        run: |
+          ${ { matrix.arch } }-w64-mingw32-strip build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll
+
+      # Upload cross-build artifacts
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

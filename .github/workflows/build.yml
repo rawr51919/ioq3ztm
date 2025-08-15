@@ -122,7 +122,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install macOS dependencies (SDL 1.2)
-        run: brew install sdl@1 openal-soft libpng freetype
+        run: |
+          brew tap cartr/qt4
+          brew install cartr/qt4/sdl12-compat openal-soft libpng freetype
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -207,9 +209,7 @@ jobs:
       - name: Strip cross-compiled binaries
         run: |
           for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
-            if [ -f "$f" ]; then
-              ${{ matrix.arch }}-w64-mingw32-strip "$f"
-            fi
+            [ -f "$f" ] && ${ { matrix.arch } }-w64-mingw32-strip "$f"
           done || true
 
       - name: Upload artifact

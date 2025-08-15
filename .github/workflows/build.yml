@@ -1,0 +1,95 @@
+name: Build ioq3ztm
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  native-build:
+    name: Native Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y \
+          build-essential libsdl2-dev libopenal-dev libogg-dev libvorbis-dev \
+          libpng-dev libfreetype6-dev
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-openal
+            mingw-w64-x86_64-libpng
+            make
+          msystem: MINGW64
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install sdl2 openal-soft libpng freetype
+
+      - name: Build engine + QVMs (Linux)
+        if: runner.os == 'Linux'
+        run: make BUILD_GAME_QVM=1
+
+      - name: Build engine + QVMs (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: make BUILD_GAME_QVM=1
+
+      - name: Build engine + QVMs (macOS)
+        if: runner.os == 'macOS'
+        run: make BUILD_GAME_QVM=1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ioq3ztm-${{ matrix.os }}
+          path: |
+            build/release*/ioq3*
+            build/release*/renderer_opengl*
+            build/release*/cgame*
+            build/release*/qagame*
+            baseq3/*.qvm
+
+  cross-build-windows:
+    name: Cross-compile Windows from Linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [i686, x86_64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MinGW-w64
+        run: sudo apt-get update && sudo apt-get install -y mingw-w64
+
+      - name: Build cross-compiled engine + QVMs
+        run: |
+          make \
+            CC=${{ matrix.arch }}-w64-mingw32-gcc \
+            STRIP=${{ matrix.arch }}-w64-mingw32-strip \
+            BUILD_GAME_QVM=1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ioq3ztm-windows-${{ matrix.arch }}
+          path: |
+            build/release*/ioq3*.exe
+            build/release*/renderer_opengl*.dll
+            build/release*/cgame*.dll
+            build/release*/qagame*.dll
+            baseq3/*.qvm

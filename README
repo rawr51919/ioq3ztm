@@ -236,7 +236,7 @@ New cvars
                                       holds custom pk3 files for your server
   sv_banFile                        - Name of the file that is used for storing
                                       the server bans
-  sv_public							- controls infomation sent to master server
+  sv_public							- controls information sent to master server
                                       and game server browsers
                                        1: send info to masters and game browsers
                                        0: send info to game browsers

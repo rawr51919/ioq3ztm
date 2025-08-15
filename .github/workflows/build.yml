@@ -6,7 +6,7 @@ on:
 
 jobs:
   linux-qvm:
-    name: Build QVMs (Linux)
+    name: Native Build Linux + QVMs
     runs-on: ubuntu-latest
     outputs:
       qvm-artifact-name: baseq3-qvms
@@ -123,7 +123,7 @@ jobs:
 
       - name: Install macOS dependencies (SDL 1.2)
         run: |
-          brew install sdl12-compat openal-soft libpng freetype || true
+          brew install sdl12-compat openal-soft || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
@@ -164,60 +164,118 @@ jobs:
             build/release*/missionpack/vm/*.qvm
             build/universal/*
 
-  cross-build-windows:
-    name: Cross-compile Windows from Linux
+  cross-build-windows-x86:
+    name: Cross-compile Windows x86
     runs-on: ubuntu-latest
     needs: linux-qvm
-    strategy:
-      matrix:
-        arch: [i686, x86_64]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install MinGW-w64 (32-bit + 64-bit)
+      - name: Install MinGW-w64 (32-bit)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             gcc-mingw-w64-i686 \
             g++-mingw-w64-i686 \
-            gcc-mingw-w64-x86-64 \
-            g++-mingw-w64-x86-64 \
-            binutils-mingw-w64 || true
+            binutils-mingw-w64 \
+            mingw-w64-i686-sdl1.2-dev \
+            mingw-w64-i686-curl || true
 
       - name: Download baseq3 QVMs
         uses: actions/download-artifact@v4
         with:
           name: baseq3-qvms
           path: baseq3
-      
+
       - name: Download missionpack QVMs
         uses: actions/download-artifact@v4
         with:
           name: missionpack-qvms
           path: missionpack
 
-      - name: Cross-compile engine
+      - name: Cross-compile engine x86
         run: |
           make \
-            CC=${{ matrix.arch }}-w64-mingw32-gcc \
-            CXX=${{ matrix.arch }}-w64-mingw32-g++ \
-            STRIP=${{ matrix.arch }}-w64-mingw32-strip \
-            WINDRES=${{ matrix.arch }}-w64-mingw32-windres \
+            CC=i686-w64-mingw32-gcc \
+            CXX=i686-w64-mingw32-g++ \
+            STRIP=i686-w64-mingw32-strip \
+            WINDRES=i686-w64-mingw32-windres \
+            CFLAGS="-mwindows" \
+            LDFLAGS="-mwindows -lSDLmain -lSDL -lcurl" \
             PLATFORM=mingw32 \
-            ARCH=${{ matrix.arch }}
+            ARCH=i686
 
-      - name: Strip cross-compiled binaries
+      - name: Strip binaries
         run: |
           for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
-            [ -f "$f" ] && ${{ matrix.arch }}-w64-mingw32-strip "$f"
+            [ -f "$f" ] && i686-w64-mingw32-strip "$f"
           done || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ioq3ztm-windows-${{ matrix.arch }}
+          name: ioq3ztm-windows-i686
+          path: |
+            build/release*/ioq3*.exe
+            build/release*/renderer_opengl*.dll
+            build/release*/cgame*.dll
+            build/release*/qagame*.dll
+            build/release*/baseq3/vm/*.qvm
+            build/release*/missionpack/vm/*.qvm
+
+  cross-build-windows-x64:
+    name: Cross-compile Windows x64
+    runs-on: ubuntu-latest
+    needs: linux-qvm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MinGW-w64 (64-bit)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-mingw-w64-x86-64 \
+            g++-mingw-w64-x86-64 \
+            binutils-mingw-w64 \
+            mingw-w64-x86-64-sdl1.2-dev \
+            mingw-w64-x86-64-curl || true
+
+      - name: Download baseq3 QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: baseq3-qvms
+          path: baseq3
+
+      - name: Download missionpack QVMs
+        uses: actions/download-artifact@v4
+        with:
+          name: missionpack-qvms
+          path: missionpack
+
+      - name: Cross-compile engine x64
+        run: |
+          make \
+            CC=x86_64-w64-mingw32-gcc \
+            CXX=x86_64-w64-mingw32-g++ \
+            STRIP=x86_64-w64-mingw32-strip \
+            WINDRES=x86_64-w64-mingw32-windres \
+            CFLAGS="-mwindows" \
+            LDFLAGS="-mwindows -lSDLmain -lSDL -lcurl" \
+            PLATFORM=mingw32 \
+            ARCH=x86_64
+
+      - name: Strip binaries
+        run: |
+          for f in build/release*/ioq3*.exe build/release*/renderer_opengl*.dll build/release*/cgame*.dll build/release*/qagame*.dll; do
+            [ -f "$f" ] && x86_64-w64-mingw32-strip "$f"
+          done || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ioq3ztm-windows-x86_64
           path: |
             build/release*/ioq3*.exe
             build/release*/renderer_opengl*.dll

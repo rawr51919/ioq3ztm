@@ -14,12 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
+      - name: Install Linux dependencies (SDL 1.2)
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             build-essential \
-            libsdl2-dev \
+            libsdl1.2-dev \
             libopenal-dev \
             libogg-dev \
             libvorbis-dev \
@@ -28,10 +28,8 @@ jobs:
 
       - name: Build engine + QVMs
         run: |
-          # Use sdl2-config to find SDL2 include/library paths
-          # Disable -Werror so warnings do not abort build
-          export CFLAGS="$(sdl2-config --cflags) -Wno-error"
-          export LDFLAGS="$(sdl2-config --libs)"
+          export CFLAGS="$(sdl-config --cflags) -Wno-error"
+          export LDFLAGS="$(sdl-config --libs)"
           make BUILD_GAME_QVM=1
 
       - name: Strip binaries
@@ -61,13 +59,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install MSYS2 dependencies
+      - name: Install MSYS2 dependencies (SDL 1.2)
         uses: msys2/setup-msys2@v2
         with:
           update: false
           install: >-
             mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-SDL
             mingw-w64-x86_64-openal
             mingw-w64-x86_64-libpng
             make
@@ -106,8 +104,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install macOS dependencies
-        run: brew install sdl2 openal-soft libpng freetype
+      - name: Install macOS dependencies (SDL 1.2)
+        run: brew install sdl@1 openal-soft libpng freetype
 
       - name: Download QVMs
         uses: actions/download-artifact@v4
@@ -116,10 +114,16 @@ jobs:
           path: baseq3
 
       - name: Build engine
-        run: make
+        run: |
+          export CFLAGS="$(sdl-config --cflags) -Wno-error"
+          export LDFLAGS="$(sdl-config --libs)"
+          make
 
       - name: Strip binaries
         run: strip build/release*/ioq3*
+
+      - name: Build Universal Binary
+        run: ./make-macosx-ub.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -131,6 +135,7 @@ jobs:
             build/release*/cgame*
             build/release*/qagame*
             baseq3/*.qvm
+            build/universal/*
 
   cross-build-windows:
     name: Cross-compile Windows from Linux

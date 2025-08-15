@@ -199,7 +199,7 @@ jobs:
 
       - name: Cross-compile engine x86
         run: |
-          chmod +x ./cross-make-mingw.sh \
+          chmod +x ./cross-make-mingw.sh && \
           ./cross-make-mingw.sh \
             CC=i686-w64-mingw32-gcc \
             CXX=i686-w64-mingw32-g++ \
@@ -258,7 +258,7 @@ jobs:
 
       - name: Cross-compile engine x64
         run: |
-          chmod +x ./cross-make-mingw64.sh \
+          chmod +x ./cross-make-mingw64.sh && \
           ./cross-make-mingw64.sh \
             CC=x86_64-w64-mingw32-gcc \
             CXX=x86_64-w64-mingw32-g++ \
